@@ -2,3 +2,13 @@ libtimidity.debug.js
 libtimidity.debug.wasm
 libtimidity.debug.wasm.map
 node_modules/
+<<<<<<< master
+/.project
+/bundle.js
+/package-lock.json
+=======
+/package-lock.json
+/.project
+/bundle.js
+>>>>>>> 43e827c Revert "Update libtimidy to 0.2.7"
+/.settings/

@@ -1,9 +1,9 @@
-# Makefile for OS/2 using Watcom compiler.
+# Makefile for Windows using Open Watcom compiler.
 #
-# wmake -f Makefile.os2
-# - builds timidity.dll and its import lib (timidity.lib)
+# wmake -f Makefile.w32
+# - builds timidity.dll and its import library timidity.lib
 #
-# wmake -f Makefile.os2 target=static
+# wmake -f Makefile.w32 target=static
 # - builds the static library timidity_static.lib
 
 !ifndef target
@@ -15,7 +15,7 @@ CPPFLAGS=-DTIMIDITY_BUILD
 # to build a debug version  :
 #CPPFLAGS+= -DTIMIDITY_DEBUG
 
-CFLAGS = -bt=os2 -bm -fp5 -fpi87 -mf -oeatxh -w4 -ei -zp8 -zq
+CFLAGS = -bt=nt -bm -fp5 -fpi87 -mf -oeatxh -w4 -ei -zp8 -zq
 # -5s  :  Pentium stack calling conventions.
 # -5r  :  Pentium register calling conventions.
 CFLAGS+= -5s
@@ -30,8 +30,10 @@ LIBNAME=timidity.lib
 LIBSTATIC=timidity_static.lib
 
 !ifeq target static
+CPPFLAGS+= -DTIMIDITY_STATIC
 BLD_TARGET=$(LIBSTATIC)
 !else
+CPPFLAGS+= -DDLL_EXPORT
 CFLAGS+= $(DLLFLAGS)
 BLD_TARGET=$(DLLNAME)
 !endif
@@ -44,7 +46,7 @@ all: $(BLD_TARGET)
 
 # rely on symbol name, not ordinal: -irn switch of wlib is default, but -inn is not.
 $(DLLNAME): $(OBJ)
-	wlink NAM $@ OP q SYSTEM os2v2_dll INITINSTANCE TERMINSTANCE OPTION MANYAUTODATA FIL {$(OBJ)} OPTION IMPF=$(EXPNAME)
+	wlink NAM $@ OP q SYSTEM nt_dll INITINSTANCE TERMINSTANCE FIL {$(OBJ)} OPTION IMPF=$(EXPNAME)
 	wlib -q -b -n -c -pa -s -t -zld -ii -io -inn $(LIBNAME) +$(DLLNAME)
 
 $(LIBSTATIC): $(OBJ)
