@@ -1,6 +1,6 @@
 Summary:   MIDI to WAVE converter library
 Name:      libtimidity
-Version:   0.2.6
+Version:   0.2.7
 Release:   1
 License:   LGPL
 Group:     System Environment/Libraries
