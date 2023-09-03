@@ -2,7 +2,3 @@ libtimidity.debug.js
 libtimidity.debug.wasm
 libtimidity.debug.wasm.map
 node_modules/
-/package-lock.json
-/.project
-/bundle.js
-/.settings/

@@ -9,7 +9,7 @@ const debugVerbose = Debug('timidity:verbose')
 
 // Inlined at build time by 'brfs' browserify transform
 const TIMIDITY_CFG = fs.readFileSync(
-  __dirname + '/fluid-soundfont-lite.cfg', // eslint-disable-line node/no-path-concat
+  __dirname + '/freepats.cfg', // eslint-disable-line node/no-path-concat
   'utf8'
 )
 
@@ -162,7 +162,7 @@ class Timidity extends EventEmitter {
 
   _loadSong (midiBuf) {
     const optsPtr = this._lib._mid_alloc_options(
-      this._audioContext.sampleRate || DEFAULT_SAMPLE_RATE,
+      SAMPLE_RATE,
       AUDIO_FORMAT,
       NUM_CHANNELS,
       BUFFER_SIZE
@@ -350,7 +350,7 @@ class Timidity extends EventEmitter {
 
   _startInterval () {
     this._onTimeupdate()
-    this._interval = setInterval(() => this._onTimeupdate(), 250)
+    this._interval = setInterval(() => this._onTimeupdate(), 1000)
   }
 
   _stopInterval () {

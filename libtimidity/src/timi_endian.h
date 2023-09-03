@@ -58,8 +58,6 @@
 #  include <machine/endian.h>
 # elif defined(__OS2__) && defined(__WATCOMC__)
 #  include <machine/endian.h>
-# elif defined(__MORPHOS__)
-#  include <machine/endian.h>
 # elif defined(__amigaos__) && defined(__NEWLIB__)
 #  include <machine/endian.h>
 # elif defined(__amigaos__) && defined(__CLIB2__)

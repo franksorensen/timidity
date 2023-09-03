@@ -139,7 +139,7 @@ static sint32 convert_vibrato_rate(MidSong *song, uint8 rate)
 {
   /* Return a suitable vibrato_control_ratio value */
   return
-    (VIBRATO_RATE_TUNING * song->rate) / 
+    (VIBRATO_RATE_TUNING * song->rate) /
       (rate * 2 * MID_VIBRATO_SAMPLE_INCREMENTS);
 }
 
@@ -159,7 +159,7 @@ static void reverse_data(sint16 *sp, sint32 ls, sint32 le)
 
 /*
    If panning or note_to_use != -1, it will be used for all samples,
-   instead of the sample-specific values in the instrument file. 
+   instead of the sample-specific values in the instrument file.
 
    For note_to_use, any value <0 or >127 will be forced to 0.
 
@@ -186,7 +186,6 @@ static void load_instrument(MidSong *song, const char *name,
   int i,j;
   static const char *patch_ext[] = PATCH_EXT_LIST;
 
-  TIMI_UNUSED(percussion);
   *out = NULL;
   if (!name) return;
 
@@ -267,15 +266,15 @@ static void load_instrument(MidSong *song, const char *name,
       uint16 tmpshort;
       uint8 tmpchar;
 
-#define READ_CHAR(thing)					\
-  if (1 != fread(&tmpchar, 1, 1, fp))  goto badread;		\
-  thing = tmpchar;
-#define READ_SHORT(thing)					\
-  if (1 != fread(&tmpshort, 2, 1, fp)) goto badread;		\
-  thing = SWAPLE16(tmpshort);
-#define READ_LONG(thing)					\
-  if (1 != fread(&tmplong, 4, 1, fp))  goto badread;		\
-  thing = SWAPLE32(tmplong);
+#define READ_CHAR(thing)				\
+      if (1 != fread(&tmpchar, 1, 1, fp)) goto badread;	\
+      thing = tmpchar;
+#define READ_SHORT(thing)				\
+      if (1 != fread(&tmpshort, 2, 1, fp)) goto badread;\
+      thing = SWAPLE16(tmpshort);
+#define READ_LONG(thing)				\
+      if (1 != fread(&tmplong, 4, 1, fp)) goto badread;	\
+      thing = SWAPLE32(tmplong);
 
       fseek(fp, 7, SEEK_CUR); /* Skip the wave name */
 
@@ -358,12 +357,12 @@ static void load_instrument(MidSong *song, const char *name,
 	sp->modes |= MODES_SUSTAIN;
 
       /* Strip any loops and envelopes we're permitted to */
-      if ((strip_loop==1) && 
-	  (sp->modes & (MODES_SUSTAIN | MODES_LOOPING | 
+      if ((strip_loop==1) &&
+	  (sp->modes & (MODES_SUSTAIN | MODES_LOOPING |
 			MODES_PINGPONG | MODES_REVERSE)))
 	{
 	  DEBUG_MSG(" - Removing loop and/or sustain\n");
-	  sp->modes &=~(MODES_SUSTAIN | MODES_LOOPING | 
+	  sp->modes &=~(MODES_SUSTAIN | MODES_LOOPING |
 			MODES_PINGPONG | MODES_REVERSE);
 	}
 
@@ -384,7 +383,7 @@ static void load_instrument(MidSong *song, const char *name,
 	      sp->modes &= ~(MODES_SUSTAIN|MODES_ENVELOPE);
 	      DEBUG_MSG(" - No loop, removing sustain and envelope\n");
 	    }
-	  else if (!memcmp(tmp, "??????", 6) || tmp[11] >= 100) 
+	  else if (!memcmp(tmp, "??????", 6) || tmp[11] >= 100)
 	    {
 	      /* Envelope rates all maxed out? Envelope end at a high "offset"?
 		 That's a weird envelope. Take it out. */
@@ -406,7 +405,7 @@ static void load_instrument(MidSong *song, const char *name,
 	{
 	  sp->envelope_rate[j]=
 	    convert_envelope_rate(song, tmp[j]);
-	  sp->envelope_offset[j]= 
+	  sp->envelope_offset[j]=
 	    convert_envelope_offset(tmp[6+j]);
 	}
 
@@ -568,7 +567,7 @@ static int fill_bank(MidSong *song, int dr, int b)
 	  if (!(bank->tone[i].name))
 	    {
 	      DEBUG_MSG("No instrument mapped to %s %d, program %d%s\n",
-		   (dr)? "drum set" : "tone bank", b, i, 
+		   (dr)? "drum set" : "tone bank", b, i,
 		   (b!=0) ? "" : " - this instrument will not be heard");
 	      if (b!=0)
 		{
@@ -593,18 +592,18 @@ static int fill_bank(MidSong *song, int dr, int b)
 	  else
 	    {
 	      load_instrument(song,
-				     bank->tone[i].name, 
+				     bank->tone[i].name,
 				     &bank->instrument[i],
 				     (dr) ? 1 : 0,
 				     bank->tone[i].pan,
 				     bank->tone[i].amp,
-				     (bank->tone[i].note!=-1) ? 
+				     (bank->tone[i].note!=-1) ?
 				     bank->tone[i].note :
 				     ((dr) ? i : -1),
 				     (bank->tone[i].strip_loop!=-1) ?
 				     bank->tone[i].strip_loop :
 				     ((dr) ? 1 : -1),
-				     (bank->tone[i].strip_envelope != -1) ? 
+				     (bank->tone[i].strip_envelope != -1) ?
 				     bank->tone[i].strip_envelope :
 				     ((dr) ? 1 : -1),
 				     bank->tone[i].strip_tail);
@@ -653,3 +652,4 @@ int set_default_instrument(MidSong *song, const char *name)
   song->default_program = SPECIAL_PROGRAM;
   return 0;
 }
+

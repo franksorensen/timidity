@@ -57,14 +57,14 @@ static char def_instr_name[256] = "";
 #define MAXWORDS 10
 #define MAX_RCFCOUNT 50
 
-/* Quick-and-dirty fgets() replacement.
- */
+/* Quick-and-dirty fgets() replacement. */
+
 static char *timi_fgets(char *s, int size, FILE *fp)
 {
     int num_read = 0;
     char *p = s;
 
-    --size;/* to nul terminate properly */
+    --size;/* so that we nul terminate properly */
 
     for (; num_read < size; ++p)
     {
@@ -89,27 +89,29 @@ static char *timi_fgets(char *s, int size, FILE *fp)
     return (num_read != 0)? s : NULL;
 }
 
+static FILE **rcf_fp;
+
 static int read_config_file(const char *name, int rcf_count)
 {
-  FILE *fp;
   char  tmp[TIM_MAXPATH];
   char *w[MAXWORDS], *cp;
   MidToneBank *bank;
   int i, j, k, line, r, words;
 
-  if (rcf_count >= MAX_RCFCOUNT) {
+  if (rcf_count >= MAX_RCFCOUNT)
+  {
     DEBUG_MSG("Probable source loop in configuration files\n");
     return -1;
   }
 
-  if (!(fp=timi_openfile(name)))
+  if (!(rcf_fp[rcf_count]=timi_openfile(name)))
     return -1;
 
   bank = NULL;
   line = 0;
   r = -1; /* start by assuming failure, */
 
-  while (timi_fgets(tmp, sizeof(tmp), fp))
+  while (timi_fgets(tmp, sizeof(tmp), rcf_fp[rcf_count]))
   {
     line++;
     words=0;
@@ -295,7 +297,6 @@ static int read_config_file(const char *name, int rcf_count)
     }
     else
     {
-      size_t sz;
       if ((words < 2) || (*w[0] < '0' || *w[0] > '9'))
       {
 	DEBUG_MSG("%s: line %d: syntax error\n", name, line);
@@ -315,10 +316,9 @@ static int read_config_file(const char *name, int rcf_count)
 	goto fail;
       }
       timi_free(bank->tone[i].name);
-      sz = strlen(w[1])+1;
-      bank->tone[i].name = (char *) timi_calloc(sz);
+      bank->tone[i].name=(char *) timi_calloc(strlen(w[1])+1);
       if (!bank->tone[i].name) goto fail;
-      memcpy(bank->tone[i].name,w[1],sz);
+      strcpy(bank->tone[i].name,w[1]);
       bank->tone[i].note=bank->tone[i].amp=bank->tone[i].pan=
       bank->tone[i].strip_loop=bank->tone[i].strip_envelope=
       bank->tone[i].strip_tail=-1;
@@ -409,7 +409,8 @@ static int read_config_file(const char *name, int rcf_count)
 
   r = 0; /* we're good. */
 fail:
-  fclose(fp);
+  fclose(rcf_fp[rcf_count]);
+  rcf_fp[rcf_count] = NULL;
   return r;
 }
 
@@ -435,22 +436,33 @@ _nomem:
 
 static int init_begin_config(const char *cf)
 {
-  const char *p = get_last_dirsep(cf);
+  const char *p;
+
+  rcf_fp = (FILE **) timi_calloc(MAX_RCFCOUNT * sizeof(FILE*));
+  if (!rcf_fp)
+      return -2;
+  p = get_last_dirsep(cf);
   if (p != NULL)
       return timi_add_pathlist(cf, p - cf + 1); /* including DIRSEP */
+
   return 0;
 }
 
 static int init_with_config(const char *cf)
 {
-  int rc = init_begin_config(cf);
+  int rc;
+
+  rc = init_begin_config(cf);
   if (rc != 0) {
       mid_exit ();
       return rc;
   }
   rc = read_config_file(cf, 0);
-  if (rc != 0) {
+  if (rc != 0)
       mid_exit ();
+  else {
+      timi_free(rcf_fp);
+      rcf_fp = NULL;
   }
   return rc;
 }
@@ -459,18 +471,20 @@ int mid_init_no_config(void)
 {
   master_tonebank[0] = NULL;
   master_drumset[0] = NULL;
+  rcf_fp = NULL;
+
   return init_alloc_banks();
 }
 
 int mid_init(const char *config_file)
 {
   int rc = mid_init_no_config();
-  if (rc != 0) {
+  if (rc != 0)
       return rc;
-  }
-  if (config_file == NULL || *config_file == '\0') {
+
+  if (config_file == NULL || *config_file == '\0')
       return init_with_config(TIMIDITY_CFG);
-  }
+
   return init_with_config(config_file);
 }
 
@@ -635,6 +649,15 @@ void mid_exit(void)
 {
   int i, j;
 
+  if (rcf_fp) {
+    for (i = 0; i < MAX_RCFCOUNT; i++) {
+      if (rcf_fp[i])
+	fclose(rcf_fp[i]);
+    }
+    timi_free(rcf_fp);
+    rcf_fp = NULL;
+  }
+
   for (i = 0; i < 128; i++) {
     if (master_tonebank[i]) {
       MidToneBankElement *e = master_tonebank[i]->tone;
@@ -672,20 +695,15 @@ long mid_get_version (void)
  */
 MidDLSPatches *mid_dlspatches_load (MidIStream *stream)
 {
-  TIMI_UNUSED(stream);
   return NULL;
 }
 
 void mid_dlspatches_free (MidDLSPatches *data)
 {
-  TIMI_UNUSED(data);
 }
 
 MidSong *mid_song_load_dls(MidIStream *stream, MidDLSPatches *dlspatches, MidSongOptions *options)
 {
-  TIMI_UNUSED(stream);
-  TIMI_UNUSED(dlspatches);
-  TIMI_UNUSED(options);
   return NULL;
 }
 

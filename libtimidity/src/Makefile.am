@@ -13,6 +13,8 @@ include_HEADERS = timidity.h
 EXTRA_DIST = \
 	Makefile.darwin \
 	Makefile.mingw \
+	Makefile.lcc \
+	timidity.def \
 	Makefile.os2 \
 	Makefile.emx \
 	Makefile.dj \
@@ -20,7 +22,7 @@ EXTRA_DIST = \
 	Makefile.amigaos \
 	Makefile.vbcc \
 	Makefile.aros \
-	Makefile.w32 \
+	OWMakefile.win32 \
 	VisualStudio \
 	XCode
 

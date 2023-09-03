@@ -124,12 +124,6 @@ extern sint32 XCHG_LONG (sint32);
 #endif
 #endif
 
-#ifndef __VBCC__
-#define TIMI_UNUSED(x) (void)(x)
-#else
-#define TIMI_UNUSED(x) /* vbcc emits an annoying warning for (void)(x) */
-#endif
-
 
 #define MID_VIBRATO_SAMPLE_INCREMENTS 32
 

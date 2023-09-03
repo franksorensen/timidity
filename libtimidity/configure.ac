@@ -2,16 +2,16 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([libtimidity],[0.2.7])
+AC_INIT([libtimidity],[0.2.6])
 LIBTIMIDITY_MAJOR_VERSION=0
 LIBTIMIDITY_MINOR_VERSION=2
-LIBTIMIDITY_MICRO_VERSION=7
+LIBTIMIDITY_MICRO_VERSION=6
 LIBTIMIDITY_VERSION=$LIBTIMIDITY_MAJOR_VERSION.$LIBTIMIDITY_MINOR_VERSION.$LIBTIMIDITY_MICRO_VERSION
 
 AC_CONFIG_AUX_DIR([autotools])
+AC_CONFIG_SRCDIR([src/playmidi.c])
 AM_INIT_AUTOMAKE([1.7 foreign])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR([src/playmidi.c])
 AM_MAINTAINER_MODE
 
 # Library versioning for libtool: CURRENT, REVISION, AGE
@@ -31,7 +31,7 @@ then
 	AC_DEFINE([TIMIDITY_DEBUG], 1, [Debug mode])
 fi
 
-AC_ARG_WITH([timidity-cfg],[AS_HELP_STRING([--with-timidity-cfg=FILE],[Specify the full path to timidity.cfg [default="timidity.cfg"]])],
+AC_ARG_WITH([timidity-cfg], AS_HELP_STRING([--with-timidity-cfg=FILE], [Specify the full path to timidity.cfg [default="timidity.cfg"]]),
    timidity_cfg="$withval", timidity_cfg="timidity.cfg")
 if test x$timidity_cfg = xyes || test x$timidity_cfg = xno
 then
@@ -44,31 +44,18 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-dnl AC_LIBTOOL_WIN32_DLL
-dnl AC_PROG_LIBTOOL
-LT_INIT([win32-dll])
+#LT_INIT([win32-dll])
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
 
-if test $ac_cv_c_compiler_gnu = yes
+if test $ac_cv_prog_gcc = yes
 then
 	CFLAGS="$CFLAGS -Wall"
 fi
 
 # Checks for libraries.
 LIBTIMIDITY_LIBS=""
-use_libm=no
-old_LIBS="${LIBS}"
-AC_CHECK_LIB([m], [pow], [use_libm=yes])
-dnl -lm not needed with darwin and mingw.
-case "${host_os}" in
- darwin*|mingw*)
-  use_libm=no
-  LIBS="${old_LIBS}"
-  ;;
-esac
-if test $use_libm = yes
-then
-	LIBTIMIDITY_LIBS="-lm"
-fi
+AC_CHECK_LIB([m], [pow], [LIBTIMIDITY_LIBS="$LIBTIMIDITY_LIBS -lm"])
 
 have_ao=no
 AC_ARG_ENABLE([ao],[AS_HELP_STRING([--disable-ao],[disable building libao-depending programs])],,[enable_ao=yes])
@@ -88,17 +75,23 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_C_BIGENDIAN
 
+# Checks for library functions.
+#AC_FUNC_MALLOC
+#AC_FUNC_MEMCMP
+#AC_CHECK_FUNCS([memset pow strchr])
+
 # symbol visibility
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden -Werror"
 AC_CACHE_CHECK([if compiler supports visibility attributes],[libtimidity_cv_gcc_visibility],
-	AC_LANG_PUSH([C])
+	AC_LANG_SAVE
+	AC_LANG_C
 	AC_TRY_COMPILE([void foo(void);
 __attribute__((visibility("default"))) void foo(void) {}],
 		[],
 		[libtimidity_cv_gcc_visibility=yes],
 		[libtimidity_cv_gcc_visibility=no])
-	AC_LANG_POP([C]))
+	AC_LANG_RESTORE)
 # we want symbol -fvisibility for elf targets, however it works
 # with darwin/macho too.  other than that, windows, dos, os/2, amiga
 # do not need it:  for any such targets, the -Werror switch is

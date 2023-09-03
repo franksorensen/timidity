@@ -309,8 +309,7 @@ static int read_track(MidIStream *stream, MidSong *song, int append)
 {
   MidEventList *meep;
   MidEventList *next, *newlist;
-  sint32 len;
-  long next_pos, pos;
+  sint32 len, next_pos, pos;
   char tmp[4];
 
   meep = song->evlist;
@@ -407,6 +406,10 @@ static MidEvent *groom_list(MidSong *song, sint32 divisions,sint32 *eventsp,
   tempo=500000;
   compute_sample_increment(song, tempo, divisions);
 
+  our_event_count=0;
+  st=at=sample_cum=0;
+  counting_time=2; /* We strip any silence before the first NOTE ON. */
+
   /* This may allocate a bit more than we need */
   groomed_list=lp=(MidEvent *) timi_calloc(sizeof(MidEvent) * (song->event_count+1));
   if (!groomed_list) {
@@ -415,10 +418,6 @@ static MidEvent *groom_list(MidSong *song, sint32 divisions,sint32 *eventsp,
     return NULL;
   }
   meep=song->evlist;
-
-  our_event_count=0;
-  st=at=sample_cum=0;
-  counting_time=2; /* We strip any silence before the first NOTE ON. */
 
   for (i = 0; i < song->event_count; i++)
     {
@@ -590,7 +589,6 @@ MidEvent *read_midi_file(MidIStream *stream, MidSong *song, sint32 *count, sint3
       return NULL;
     }
 
-  format=tracks=divisions_tmp = -1;
   mid_istream_read(stream, &format, 2, 1);
   mid_istream_read(stream, &tracks, 2, 1);
   mid_istream_read(stream, &divisions_tmp, 2, 1);
